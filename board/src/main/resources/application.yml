@@ -1,0 +1,22 @@
+spring:
+  h2:
+    console:
+      path: /h2-console
+      enabled: true
+
+  datasource:
+    url: jdbc:h2:mem:board;mode=MYSQL;
+    username: sa
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      show-sql: true
+      format_sql: true
+      highlight_sql: true
+
+logging:
+  level:
+    org.hibernate.sql: debug
+    org.hibernate.type: trace
