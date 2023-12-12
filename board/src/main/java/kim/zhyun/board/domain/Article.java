@@ -1,10 +1,7 @@
 package kim.zhyun.board.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -15,8 +12,8 @@ import java.time.LocalDateTime;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
 @ToString
-@Getter
-@AllArgsConstructor(staticName = "of")
+@Getter @Builder
+@AllArgsConstructor
 @NoArgsConstructor
 @DynamicUpdate
 @EntityListeners(AuditingEntityListener.class)
@@ -39,10 +36,4 @@ public class Article {
     @LastModifiedDate
     private LocalDateTime modifiedAt;
     
-    
-    public Article update(String title, String content) {
-        this.title = title;
-        this.content = content;
-        return this;
-    }
 }
