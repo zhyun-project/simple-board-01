@@ -1,0 +1,11 @@
+### 게시글 전체 조회
+GET http://localhost:8080/articles
+
+### 게시글 단건 조회 - 성공 <-- 게시글 저장 구현 후 사용
+GET http://localhost:8080/articles/1
+
+### 게시글 단건 조회 - 없는 게시글 <-- 게시글 저장 구현 후 사용
+GET http://localhost:8080/articles/1000
+
+
+
