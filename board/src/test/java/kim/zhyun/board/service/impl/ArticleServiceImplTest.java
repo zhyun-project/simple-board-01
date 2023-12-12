@@ -7,6 +7,7 @@ import kim.zhyun.board.domain.Article;
 import kim.zhyun.board.exception.ArticleNotFoundException;
 import kim.zhyun.board.repository.ArticleRepository;
 import kim.zhyun.board.type.ExceptionType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,7 @@ class ArticleServiceImplTest {
     void findAll() {
         // when - then
         assertThat(service.findAll())
+                .usingRecursiveComparison()
                 .isEqualTo(repository.findAll().stream()
                         .map(ArticleDto::from)
                         .toList());
@@ -46,7 +48,7 @@ class ArticleServiceImplTest {
     @Test
     void findByIdWithArticleNotFoundException() {
         // given
-        long articleId = 1L;
+        long articleId = Long.MAX_VALUE;
         
         // when - then
         assertThrows(ArticleNotFoundException.class,
@@ -58,9 +60,7 @@ class ArticleServiceImplTest {
     @Test
     void findById() {
         // given
-        insertDummyData();
-        
-        long articleId = 1L;
+        long articleId = service.findAll().get(3).getId();
         
         // when - then
         assertThat(service.findById(articleId))
@@ -104,10 +104,8 @@ class ArticleServiceImplTest {
     @DisplayName("게시글 수정 - 성공")
     @Test
     void update() {
-        insertDummyData();
-        
         // given
-        long id = 3L;
+        long id = service.findAll().get(7).getId();
         ArticleDto beforeArticle = service.findById(id);
         ArticleUpdateRequest request = ArticleUpdateRequest.of(id, "게시글 수정됨", "🔨🔧🪛");
         
@@ -124,9 +122,8 @@ class ArticleServiceImplTest {
         assertThat(actual).usingRecursiveComparison().isEqualTo(updatedArticle);
     }
     
-    
-    
-    private void insertDummyData() {
+    @BeforeEach
+    public void insertDummyData() {
         List<Article> dummyInsert = new ArrayList<>();
         IntStream.rangeClosed(1, 10)
                 .forEach(idx -> dummyInsert.add(Article.builder()
@@ -136,5 +133,13 @@ class ArticleServiceImplTest {
         System.out.println("💁------- dummy data inserted ------------------------------------------------------------------------------------------------------┐");
         repository.saveAll(dummyInsert);
         System.out.println("💁----------------------------------------------------------------------------------------------------------------------------------┘");
+        printAllData();
+    }
+    
+    private void printAllData() {
+        System.out.println("💁------- show all article data ------------------------------------------------------------------------------------------------------┐");
+        repository.findAll()
+                .forEach(System.out::println);
+        System.out.println("💁------------------------------------------------------------------------------------------------------------------------------------┘");
     }
 }
