@@ -1,11 +1,14 @@
 package kim.zhyun.board.service.impl;
 
+import kim.zhyun.board.data.ArticleCreateRequest;
 import kim.zhyun.board.data.ArticleDto;
+import kim.zhyun.board.domain.Article;
 import kim.zhyun.board.exception.ArticleNotFoundException;
 import kim.zhyun.board.repository.ArticleRepository;
 import kim.zhyun.board.service.ArticleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -13,6 +16,7 @@ import java.util.Objects;
 import static kim.zhyun.board.type.ExceptionType.ARTICLE_NOT_FOUND;
 
 @RequiredArgsConstructor
+@Transactional
 @Service
 public class ArticleServiceImpl implements ArticleService {
     private final ArticleRepository articleRepository;
@@ -31,6 +35,13 @@ public class ArticleServiceImpl implements ArticleService {
         return ArticleDto.from(articleRepository
                 .findById(id)
                 .orElseThrow(() -> new ArticleNotFoundException(ARTICLE_NOT_FOUND)));
+    }
+    
+    @Override
+    public long save(ArticleCreateRequest request) {
+        Article saved = articleRepository.save(ArticleCreateRequest.to(request));
+        
+        return saved.getId();
     }
     
     
