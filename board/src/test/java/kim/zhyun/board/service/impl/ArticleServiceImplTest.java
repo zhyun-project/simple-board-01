@@ -1,5 +1,6 @@
 package kim.zhyun.board.service.impl;
 
+import kim.zhyun.board.data.ArticleCreateRequest;
 import kim.zhyun.board.data.ArticleDto;
 import kim.zhyun.board.domain.Article;
 import kim.zhyun.board.exception.ArticleNotFoundException;
@@ -66,6 +67,24 @@ class ArticleServiceImplTest {
                 .isEqualTo(ArticleDto.from(repository.findById(articleId).orElseGet(Article::new)));
     }
     
+    @DisplayName("게시글 등록")
+    @Test
+    void save() {
+        // given
+        ArticleCreateRequest request = ArticleCreateRequest.of("테스트입니다.", "안뇽하세요? 감기 안걸리도록 기원하는 글 🙏");
+        
+        // when
+        List<Article> beforeArticles = repository.findAll();
+        long savedId = service.save(request);
+        
+        // then
+        List<Long> saveBeforeArticleIds = beforeArticles.stream().map(Article::getId).toList();
+        ArticleDto saved = service.findById(savedId);
+        ArticleCreateRequest actual = ArticleCreateRequest.of(saved.getTitle(), saved.getContent());
+        
+        assertThat(savedId).isNotIn(saveBeforeArticleIds);
+        assertThat(actual).usingRecursiveComparison().isEqualTo(request);
+    }
     
     
     private void insertDummyData() {
