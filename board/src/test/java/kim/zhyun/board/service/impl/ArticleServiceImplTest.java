@@ -2,6 +2,7 @@ package kim.zhyun.board.service.impl;
 
 import kim.zhyun.board.data.ArticleCreateRequest;
 import kim.zhyun.board.data.ArticleDto;
+import kim.zhyun.board.data.ArticleUpdateRequest;
 import kim.zhyun.board.domain.Article;
 import kim.zhyun.board.exception.ArticleNotFoundException;
 import kim.zhyun.board.repository.ArticleRepository;
@@ -85,6 +86,44 @@ class ArticleServiceImplTest {
         assertThat(savedId).isNotIn(saveBeforeArticleIds);
         assertThat(actual).usingRecursiveComparison().isEqualTo(request);
     }
+    
+    
+    @DisplayName("게시글 수정 - 실패 : 없는 게시글 번호 접근")
+    @Test
+    void update_fail_in_non_existent_id() {
+        // given
+        ArticleUpdateRequest request = ArticleUpdateRequest.of(Long.MAX_VALUE, "버그내야지", "🐛");
+        
+        // when - then
+        assertThrows(ArticleNotFoundException.class,
+                () -> service.update(request),
+                ExceptionType.ARTICLE_NOT_FOUND.getDescription());
+    }
+    
+    
+    @DisplayName("게시글 수정 - 성공")
+    @Test
+    void update() {
+        insertDummyData();
+        
+        // given
+        long id = 3L;
+        ArticleDto beforeArticle = service.findById(id);
+        ArticleUpdateRequest request = ArticleUpdateRequest.of(id, "게시글 수정됨", "🔨🔧🪛");
+        
+        // when
+        service.update(request);
+        
+        // then
+        ArticleDto updatedArticle = service.findById(id);
+        ArticleUpdateRequest actual = ArticleUpdateRequest.of(updatedArticle.getId(),
+                                                              updatedArticle.getTitle(),
+                                                              updatedArticle.getContent());
+
+        assertThat(updatedArticle).usingRecursiveComparison().isNotEqualTo(beforeArticle);
+        assertThat(actual).usingRecursiveComparison().isEqualTo(updatedArticle);
+    }
+    
     
     
     private void insertDummyData() {
