@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -120,6 +121,45 @@ class ArticleServiceImplTest {
 
         assertThat(updatedArticle).usingRecursiveComparison().isNotEqualTo(beforeArticle);
         assertThat(actual).usingRecursiveComparison().isEqualTo(updatedArticle);
+    }
+    
+    @DisplayName("게시글 삭제 - 게시글 1개 삭제")
+    @Test
+    void delete_one() {
+        // given
+        List<ArticleDto> articleDtos = service.findAll();
+        int beforeArticlesSize = articleDtos.size();
+        
+        long id = articleDtos.get(9).getId();
+        
+        // when
+        service.deleteOne(id);
+        
+        // then
+        assertThrows(ArticleNotFoundException.class,
+                    () -> service.findById(id),
+                    ExceptionType.ARTICLE_NOT_FOUND.getDescription());
+        assertThat(service.findAll().size() + 1).isEqualTo(beforeArticlesSize);
+    }
+    
+    @DisplayName("게시글 삭제 - 게시글 여러개 삭제")
+    @Test
+    void delete_in_non_existent_id() {
+        // given
+        List<ArticleDto> articleDtos = service.findAll();
+        int beforeArticlesSize = articleDtos.size();
+        
+        Set<Long> ids = Set.of(
+                articleDtos.get(1).getId(),
+                articleDtos.get(3).getId(),
+                articleDtos.get(6).getId());
+        
+        // when
+        service.deleteMany(ids);
+        
+        // then
+        ids.forEach(id -> assertThat(repository.existsById(id)).isFalse());
+        assertThat(service.findAll().size() + ids.size()).isEqualTo(beforeArticlesSize);
     }
     
     @BeforeEach
