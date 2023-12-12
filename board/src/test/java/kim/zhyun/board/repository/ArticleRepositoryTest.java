@@ -44,7 +44,9 @@ class ArticleRepositoryTest {
     @DisplayName("게시글 등록 테스트 - 게시글 1개")
     public void insert_and_read_article_all() {
         // given
-        Article article = Article.of(null, "title 1", "content 1", null, null);
+        Article article = Article.builder()
+                .title("title 1")
+                .content("content 1").build();
         
         // when
         Article saved = repository.save(article);
@@ -66,12 +68,14 @@ class ArticleRepositoryTest {
         insertDummyData();
         
         Article read1L = repository.getReferenceById(1L);
-        
+
         // when
-        Article updated = repository.saveAndFlush(
-                read1L.update(read1L.getTitle() + " update 고고",
-                        read1L.getContent() + " update 고고"));
-        
+        Article updated = repository.save(Article.builder()
+                .id(read1L.getId())
+                .title(read1L.getTitle() + " update 고고")
+                .content(read1L.getContent() + " update 고고")
+                .createdAt(read1L.getCreatedAt()).build());
+
         //then
         assertThat(repository.getReferenceById(1L)).isEqualTo(updated);
         
@@ -151,8 +155,9 @@ class ArticleRepositoryTest {
     private void insertDummyData() {
         List<Article> dummyInsert = new ArrayList<>();
         IntStream.rangeClosed(1, 10)
-                .forEach(idx -> dummyInsert.add(
-                        Article.of(null, "title " + idx, "content " + idx, null, null)));
+                .forEach(idx -> dummyInsert.add(Article.builder()
+                        .title("title " + idx)
+                        .content("content " + idx).build()));
         
         System.out.println("💁------- dummy data inserted ------------------------------------------------------------------------------------------------------┐");
         repository.saveAll(dummyInsert);
