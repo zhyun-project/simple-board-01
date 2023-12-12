@@ -2,6 +2,7 @@ package kim.zhyun.board.service.impl;
 
 import kim.zhyun.board.data.ArticleCreateRequest;
 import kim.zhyun.board.data.ArticleDto;
+import kim.zhyun.board.data.ArticleUpdateRequest;
 import kim.zhyun.board.domain.Article;
 import kim.zhyun.board.exception.ArticleNotFoundException;
 import kim.zhyun.board.repository.ArticleRepository;
@@ -44,5 +45,12 @@ public class ArticleServiceImpl implements ArticleService {
         return saved.getId();
     }
     
+    @Override
+    public void update(ArticleUpdateRequest request) {
+        if (!articleRepository.existsById(request.getId()))
+            throw new ArticleNotFoundException(ARTICLE_NOT_FOUND);
+        
+        articleRepository.save(ArticleUpdateRequest.to(request));
+    }
     
 }
