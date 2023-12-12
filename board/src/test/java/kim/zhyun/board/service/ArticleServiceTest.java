@@ -1,4 +1,4 @@
-package kim.zhyun.board.service.impl;
+package kim.zhyun.board.service;
 
 import kim.zhyun.board.data.ArticleCreateRequest;
 import kim.zhyun.board.data.ArticleDto;
@@ -24,12 +24,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Transactional
 @SpringBootTest
-class ArticleServiceImplTest {
-    private final ArticleServiceImpl service;
+class ArticleServiceTest {
+    private final ArticleService service;
     private final ArticleRepository repository;
     
-    public ArticleServiceImplTest(@Autowired ArticleServiceImpl service,
-                                  @Autowired ArticleRepository repository) {
+    public ArticleServiceTest(@Autowired ArticleService service,
+                              @Autowired ArticleRepository repository) {
         this.service = service;
         this.repository = repository;
     }
