@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import static kim.zhyun.board.type.ExceptionType.ARTICLE_NOT_FOUND;
 
@@ -51,6 +52,16 @@ public class ArticleServiceImpl implements ArticleService {
             throw new ArticleNotFoundException(ARTICLE_NOT_FOUND);
         
         articleRepository.save(ArticleUpdateRequest.to(request));
+    }
+    
+    @Override
+    public void deleteOne(long id) {
+        articleRepository.deleteById(id);
+    }
+    
+    @Override
+    public void deleteMany(Set<Long> ids) {
+        articleRepository.deleteAllByIdInBatch(ids);
     }
     
 }

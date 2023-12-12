@@ -5,6 +5,7 @@ import kim.zhyun.board.data.ArticleDto;
 import kim.zhyun.board.data.ArticleUpdateRequest;
 
 import java.util.List;
+import java.util.Set;
 
 public interface ArticleService {
     
@@ -12,5 +13,7 @@ public interface ArticleService {
     ArticleDto findById(long id);
     long save(ArticleCreateRequest request);
     void update(ArticleUpdateRequest request);
+    void deleteOne(long id);
+    void deleteMany(Set<Long> ids);
     
 }
