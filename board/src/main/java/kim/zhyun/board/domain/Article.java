@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
 @ToString
-@Getter @Builder
-@AllArgsConstructor
+@Getter @Setter
+@AllArgsConstructor(staticName = "of")
 @NoArgsConstructor
 @DynamicUpdate
 @EntityListeners(AuditingEntityListener.class)
