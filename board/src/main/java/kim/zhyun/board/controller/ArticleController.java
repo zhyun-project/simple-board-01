@@ -24,10 +24,7 @@ import java.util.Set;
 public class ArticleController {
     private final ArticleService service;
     
-    /**
-     * 게시글 조회
-     */
-    @Operation(summary = "전체 게시글 조회")
+    @Operation(summary = "게시글 조회 - 전체")
     @GetMapping("/articles")
     public ResponseEntity<Object> findAll() {
         return ResponseEntity.ok(ApiResponse.<List<ArticleDto>>builder()
@@ -36,7 +33,7 @@ public class ArticleController {
                 .result(service.findAll()).build());
     }
     
-    @Operation(summary = "게시글 1개 조회")
+    @Operation(summary = "게시글 조회 - 1개")
     @GetMapping("/articles/{id}")
     public ResponseEntity<Object> findAll(@PathVariable long id) {
         return ResponseEntity.ok(ApiResponse.<ArticleDto>builder()
@@ -45,9 +42,6 @@ public class ArticleController {
                 .result(service.findById(id)).build());
     }
     
-    /**
-     * 게시글 등록
-     */
     @Operation(summary = "게시글 등록")
     @Parameter(name = "Request body", description = "제목과 내용을 담은 Json Object")
     @PostMapping("/article")
@@ -67,9 +61,6 @@ public class ArticleController {
     }
     
     
-    /**
-     * 게시글 수정
-     */
     @Operation(summary = "게시글 수정")
     @Parameter(name = "Request body", description = "게시글 id, 제목, 내용을 담은 Json Object")
     @PutMapping("/articles/{id}")
@@ -88,10 +79,7 @@ public class ArticleController {
     }
     
     
-    /**
-     * 게시글 삭제
-     */
-    @Operation(summary = "게시글 삭제")
+    @Operation(summary = "게시글 삭제 - 한개")
     @DeleteMapping("/articles/{id}")
     public ResponseEntity<Object> delete(@PathVariable long id) {
         service.deleteOne(id);
@@ -105,7 +93,7 @@ public class ArticleController {
                 .location(location).build();
     }
     
-    @Operation(summary = "게시글 삭제")
+    @Operation(summary = "게시글 삭제 - 여러개")
     @Parameter(name = "Request body", description = "게시글 id를 담은 정수형 Json Array")
     @DeleteMapping("/articles")
     public ResponseEntity<Object> delete(@RequestBody Set<Long> ids) {
