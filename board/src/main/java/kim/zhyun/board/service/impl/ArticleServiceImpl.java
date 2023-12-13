@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import static kim.zhyun.board.type.ExceptionType.ARTICLE_NOT_FOUND;
+import static kim.zhyun.board.data.type.ExceptionType.ARTICLE_NOT_FOUND;
 
 @RequiredArgsConstructor
 @Transactional
