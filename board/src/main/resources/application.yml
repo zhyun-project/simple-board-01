@@ -5,12 +5,12 @@ spring:
       enabled: true
 
   datasource:
-    url: jdbc:h2:mem:board;mode=MYSQL;
+    url: jdbc:h2:./h2/board;mode=MYSQL;
     username: sa
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     properties:
       hibernate:
         show_sql: true
