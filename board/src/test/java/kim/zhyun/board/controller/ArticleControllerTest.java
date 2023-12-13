@@ -21,14 +21,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.Set;
 
 import static java.time.LocalDateTime.now;
 import static kim.zhyun.board.type.ExceptionType.ARTICLE_NOT_FOUND;
 import static org.mockito.BDDMockito.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -58,7 +59,7 @@ class ArticleControllerTest {
         @Test
         void findAll_size_zero() throws Exception {
             // When & Then
-            mvc.perform(get("/articles").contentType(MediaType.APPLICATION_JSON))
+            mvc.perform(get("/articles").contentType(APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("status").value(true))
                     .andExpect(jsonPath("message").value("article 전체 조회"))
@@ -78,7 +79,7 @@ class ArticleControllerTest {
             when(articleService.findAll()).thenReturn(dtos);
             
             // Then
-            mvc.perform(get("/articles").contentType(MediaType.APPLICATION_JSON))
+            mvc.perform(get("/articles").contentType(APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value(true))
                     .andExpect(jsonPath("$.message").value("article 전체 조회"))
@@ -99,7 +100,7 @@ class ArticleControllerTest {
             when(articleService.findById(articleId)).thenReturn(articleDto);
             
             // Then
-            mvc.perform(get("/articles/{id}", articleId).contentType(MediaType.APPLICATION_JSON))
+            mvc.perform(get("/articles/{id}", articleId).contentType(APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value(true))
                     .andExpect(jsonPath("$.message").value("article " + articleId + " 조회"))
@@ -119,7 +120,7 @@ class ArticleControllerTest {
             given(articleService.findById(articleId)).willThrow(new ArticleNotFoundException(ARTICLE_NOT_FOUND));
             
             // Then
-            mvc.perform(get("/articles/{id}", articleId).contentType(MediaType.APPLICATION_JSON))
+            mvc.perform(get("/articles/{id}", articleId).contentType(APPLICATION_JSON))
                     .andExpect((result) -> assertTrue("", result.getResolvedException() instanceof ArticleNotFoundException))
                     .andExpect(status().is4xxClientError())
                     .andExpect(jsonPath("status").value(false))
@@ -146,7 +147,7 @@ class ArticleControllerTest {
             
             // then
             mvc.perform(post("/article")
-                            .contentType(MediaType.APPLICATION_JSON)
+                            .contentType(APPLICATION_JSON)
                             .content(mapper.writeValueAsString(request)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.status").value(true))
@@ -218,7 +219,7 @@ class ArticleControllerTest {
                 
                 // then
                 mvc.perform(post("/article")
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .contentType(APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.status").value(false))
@@ -248,7 +249,7 @@ class ArticleControllerTest {
             
             // then
             mvc.perform(put("/articles/{id}", updateId)
-                            .contentType(MediaType.APPLICATION_JSON)
+                            .contentType(APPLICATION_JSON)
                             .content(mapper.writeValueAsString(request)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.status").value(true))
@@ -326,7 +327,7 @@ class ArticleControllerTest {
                 
                 // then
                 mvc.perform(put("/articles/{id}", id)
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .contentType(APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(request)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.status").value(false))
@@ -337,6 +338,89 @@ class ArticleControllerTest {
                 verify(articleService, times(0)).update(request);
             }
         }
+    }
+    
+    
+    @DisplayName("게시글 삭제 Case 모음")
+    @Nested
+    class DeleteArticle {
+        
+        @DisplayName("1건 삭제")
+        @Test
+        void delete_one() throws Exception {
+            // given
+            long deleteId = 10L;
+            
+            // when
+            willDoNothing().given(articleService).deleteOne(deleteId);
+            
+            // then
+            mvc.perform(delete("/articles/{id}", deleteId))
+                    .andExpect(status().isNoContent())
+                    .andExpect(redirectedUrl("http://localhost/articles"))
+                    .andDo(print());
+            
+            verify(articleService).deleteOne(deleteId);
+        }
+        
+        @DisplayName("1건 삭제 - 없는 게시글")
+        @Test
+        void delete_one_non_existent() throws Exception {
+            // given
+            long deleteId = Long.MAX_VALUE;
+            
+            // when
+            willDoNothing().given(articleService).deleteOne(deleteId);
+            
+            // then
+            mvc.perform(delete("/articles/{id}", deleteId))
+                    .andExpect(status().isNoContent())
+                    .andExpect(redirectedUrl("http://localhost/articles"))
+                    .andDo(print());
+            
+            verify(articleService).deleteOne(deleteId);
+        }
+        
+        @DisplayName("여러건 삭제")
+        @Test
+        void delete_many() throws Exception {
+            // given
+            Set<Long> deleteIds = Set.of(2L, 3L, 7L, 1L);
+            
+            // when
+            willDoNothing().given(articleService).deleteMany(deleteIds);
+            
+            // then
+            mvc.perform(delete("/articles")
+                            .contentType(APPLICATION_JSON)
+                            .content(mapper.writeValueAsString(deleteIds)))
+                    .andExpect(status().isNoContent())
+                    .andExpect(redirectedUrl("http://localhost/articles"))
+                    .andDo(print());
+            
+            verify(articleService).deleteMany(deleteIds);
+        }
+        
+        @DisplayName("여러건 삭제 - 없는 게시글")
+        @Test
+        void delete_many_non_existent() throws Exception {
+            // given
+            Set<Long> deleteIds = Set.of(200L, 3000L, 7000L, 1000L);
+            
+            // when
+            willDoNothing().given(articleService).deleteMany(deleteIds);
+            
+            // then
+            mvc.perform(delete("/articles")
+                            .contentType(APPLICATION_JSON)
+                            .content(mapper.writeValueAsString(deleteIds)))
+                    .andExpect(status().isNoContent())
+                    .andExpect(redirectedUrl("http://localhost/articles"))
+                    .andDo(print());
+            
+            verify(articleService).deleteMany(deleteIds);
+        }
+        
     }
     
     
