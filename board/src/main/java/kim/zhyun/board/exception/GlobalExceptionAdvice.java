@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionAdvice {
     
     @ExceptionHandler(ArticleNotFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> articleNotFoundException(ArticleNotFoundException e) {
+    public ResponseEntity<Object> articleNotFoundException(ArticleNotFoundException e) {
         return ResponseEntity
                 .badRequest().body(ApiResponse.<Void>builder()
                         .status(false)
