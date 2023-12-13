@@ -1,6 +1,6 @@
 package kim.zhyun.board.exception;
 
-import kim.zhyun.board.type.ExceptionType;
+import kim.zhyun.board.data.type.ExceptionType;
 
 public class ArticleNotFoundException extends RuntimeException {
     

@@ -6,7 +6,7 @@ import kim.zhyun.board.data.ArticleUpdateRequest;
 import kim.zhyun.board.domain.Article;
 import kim.zhyun.board.exception.ArticleNotFoundException;
 import kim.zhyun.board.repository.ArticleRepository;
-import kim.zhyun.board.type.ExceptionType;
+import kim.zhyun.board.data.type.ExceptionType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

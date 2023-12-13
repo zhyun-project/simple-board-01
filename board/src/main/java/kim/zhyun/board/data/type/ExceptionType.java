@@ -1,4 +1,4 @@
-package kim.zhyun.board.type;
+package kim.zhyun.board.data.type;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

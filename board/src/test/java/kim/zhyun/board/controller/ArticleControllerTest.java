@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 import static java.time.LocalDateTime.now;
-import static kim.zhyun.board.type.ExceptionType.ARTICLE_NOT_FOUND;
+import static kim.zhyun.board.data.type.ExceptionType.ARTICLE_NOT_FOUND;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
