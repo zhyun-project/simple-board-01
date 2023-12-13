@@ -26,3 +26,15 @@ Content-Type: application/json
   "title": "title 11",
   "content": "content 11"
 }
+
+
+### 게시글 여러 건 삭제
+DELETE http://localhost:8080/articles
+Content-Type: application/json
+
+[1, 2, 3, 4, 5]
+
+### 게시글 1건 삭제
+DELETE http://localhost:8080/articles/3
+Content-Type: application/json
+

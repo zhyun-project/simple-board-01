@@ -13,6 +13,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @RestController
@@ -74,5 +75,34 @@ public class ArticleController {
                 .body(ApiResponse.<Void>builder()
                         .status(true)
                         .message("수정되었습니다.").build());
+    }
+    
+    
+    /**
+     * 게시글 삭제
+     */
+    @DeleteMapping("/articles/{id}")
+    public ResponseEntity<Object> delete(@PathVariable long id) {
+        service.deleteOne(id);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentContextPath()
+                .path("/articles")
+                .build().toUri();
+        
+        return ResponseEntity
+                .noContent()
+                .location(location).build();
+    }
+    
+    @DeleteMapping("/articles")
+    public ResponseEntity<Object> delete(@RequestBody Set<Long> ids) {
+        service.deleteMany(ids);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequestUri()
+                .build().toUri();
+        
+        return ResponseEntity
+                .noContent()
+                .location(location).build();
     }
 }
