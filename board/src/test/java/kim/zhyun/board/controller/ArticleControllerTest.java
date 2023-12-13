@@ -169,11 +169,12 @@ class ArticleControllerTest {
                 ArticleCreateRequest request = ArticleCreateRequest.of("", "졸리다 😳");
                 long saveId = 10L;
                 
+                // run
                 List<ValidExceptionResponse> exceptionResponse = List.of(
                         ValidExceptionResponse.builder()
                                 .field("title")
                                 .message("제목을 입력해주세요").build());
-                // run
+                
                 run(request, exceptionResponse);
             }
             
@@ -184,12 +185,12 @@ class ArticleControllerTest {
                 ArticleCreateRequest request = ArticleCreateRequest.of("타이틀", "");
                 long saveId = 10L;
                 
+                // run
                 List<ValidExceptionResponse> exceptionResponse = List.of(
                         ValidExceptionResponse.builder()
                                 .field("content")
                                 .message("내용을 입력해주세요").build());
                 
-                // run
                 run(request, exceptionResponse);
             }
             
@@ -201,6 +202,7 @@ class ArticleControllerTest {
                 ArticleCreateRequest request = ArticleCreateRequest.of("", "");
                 long saveId = 10L;
                 
+                // run
                 List<ValidExceptionResponse> exceptionResponse = List.of(
                         ValidExceptionResponse.builder()
                                 .field("title")
@@ -209,7 +211,6 @@ class ArticleControllerTest {
                                 .field("content")
                                 .message("내용을 입력해주세요").build());
                 
-                // run
                 run(request, exceptionResponse);
             }
             
@@ -271,14 +272,12 @@ class ArticleControllerTest {
                 long updateId = 10L;
                 ArticleUpdateRequest request = ArticleUpdateRequest.of(updateId, "", "우리 집에 홍주가 업데이트 되었다 😋");
                 
-                // when
-                willDoNothing().given(articleService).update(request);
-                
+                // run
                 List<ValidExceptionResponse> exceptionResponse = List.of(
                         ValidExceptionResponse.builder()
                                 .field("title")
                                 .message("제목을 입력해주세요").build());
-                // run
+                
                 run(updateId, request, exceptionResponse);
             }
             
@@ -289,15 +288,12 @@ class ArticleControllerTest {
                 long updateId = 10L;
                 ArticleUpdateRequest request = ArticleUpdateRequest.of(updateId, "제목 1 수정", "");
                 
-                // when
-                willDoNothing().given(articleService).update(request);
-                
+                // run
                 List<ValidExceptionResponse> exceptionResponse = List.of(
                         ValidExceptionResponse.builder()
                                 .field("content")
                                 .message("내용을 입력해주세요").build());
                 
-                // run
                 run(updateId, request, exceptionResponse);
             }
             
@@ -309,6 +305,7 @@ class ArticleControllerTest {
                 long updateId = 10L;
                 ArticleUpdateRequest request = ArticleUpdateRequest.of(updateId, "", "");
                 
+                // run
                 List<ValidExceptionResponse> exceptionResponse = List.of(
                         ValidExceptionResponse.builder()
                                 .field("title")
@@ -317,7 +314,6 @@ class ArticleControllerTest {
                                 .field("content")
                                 .message("내용을 입력해주세요").build());
                 
-                // run
                 run(updateId, request, exceptionResponse);
             }
             
@@ -431,7 +427,7 @@ class ArticleControllerTest {
         return parser.parse(mapper.writeValueAsString(articleDto));
     }
     
-    private Object getJsonArrayDto(List<ArticleDto> dtos) {
+    private JSONArray getJsonArrayDto(List<ArticleDto> dtos) {
         JSONArray array = new JSONArray();
         dtos.forEach(dto -> {
             try {
@@ -443,7 +439,7 @@ class ArticleControllerTest {
         return array;
     }
     
-    private Object getJsonArrayValidException(List<ValidExceptionResponse> objs) {
+    private JSONArray getJsonArrayValidException(List<ValidExceptionResponse> objs) {
         JSONArray array = new JSONArray();
         objs.forEach(obj -> {
             try {
