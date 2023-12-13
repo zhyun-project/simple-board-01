@@ -1,14 +1,16 @@
 package kim.zhyun.board.controller;
 
+import jakarta.validation.Valid;
 import kim.zhyun.board.data.ApiResponse;
+import kim.zhyun.board.data.ArticleCreateRequest;
 import kim.zhyun.board.data.ArticleDto;
 import kim.zhyun.board.service.ArticleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -38,4 +40,19 @@ public class ArticleController {
     /**
      * 게시글 등록
      */
+    @PostMapping("/article")
+    public ResponseEntity<Object> save(@Valid @RequestBody ArticleCreateRequest request) {
+        long savedId = service.save(request);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentContextPath()
+                .path("/articles/{id}")
+                .buildAndExpand(savedId)
+                .toUri();
+        
+        return ResponseEntity
+                .created(location)
+                .body(ApiResponse.<Void>builder()
+                        .status(true)
+                        .message("등록되었습니다.").build());
+    }
 }
