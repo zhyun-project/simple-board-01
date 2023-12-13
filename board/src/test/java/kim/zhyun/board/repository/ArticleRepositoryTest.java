@@ -2,6 +2,7 @@ package kim.zhyun.board.repository;
 
 import kim.zhyun.board.config.JpaAuditingConfig;
 import kim.zhyun.board.domain.Article;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,18 +36,13 @@ class ArticleRepositoryTest {
         // then
         assertThat(articles).isEqualTo(List.of());
         assertThat(articles.size()).isEqualTo(0);
-        
-        // log
-        printAllData();
     }
     
     @Test
     @DisplayName("게시글 등록 테스트 - 게시글 1개")
     public void insert_and_read_article_all() {
         // given
-        Article article = Article.builder()
-                .title("title 1")
-                .content("content 1").build();
+        Article article = Article.of(null, "title 1", "content 1", null, null);
         
         // when
         Article saved = repository.save(article);
@@ -56,9 +52,6 @@ class ArticleRepositoryTest {
         
         assertThat(articles).isEqualTo(List.of(saved));
         assertThat(articles.size()).isEqualTo(1);
-        
-        // log
-        printAllData();
     }
     
     @Test
@@ -70,17 +63,11 @@ class ArticleRepositoryTest {
         Article read1L = repository.getReferenceById(1L);
 
         // when
-        Article updated = repository.save(Article.builder()
-                .id(read1L.getId())
-                .title(read1L.getTitle() + " update 고고")
-                .content(read1L.getContent() + " update 고고")
-                .createdAt(read1L.getCreatedAt()).build());
-
-        //then
-        assertThat(repository.getReferenceById(1L)).isEqualTo(updated);
+        read1L.setTitle("title update 고고");
+        read1L.setTitle("content update 고고");
         
-        // log
-        printAllData();
+        //then
+        assertThat(repository.getReferenceById(1L)).isEqualTo(read1L);
     }
     
     @Test
@@ -94,9 +81,6 @@ class ArticleRepositoryTest {
         
         // then
         assertThat(repository.findById(3L)).isEmpty();
-        
-        // log
-        printAllData();
     }
     
     @Test
@@ -110,10 +94,8 @@ class ArticleRepositoryTest {
         
         // then
         assertThat(repository.findById(300L)).isEmpty();
-        
-        // log
-        printAllData();
     }
+    
     @Test
     @DisplayName("게시글 여러개 삭제 - 존재하는 게시글")
     public void delete_article_many() {
@@ -128,9 +110,6 @@ class ArticleRepositoryTest {
         // then
         articleIds.forEach(id ->
                 assertThat(repository.existsById(id)).isFalse());
-        
-        // log
-        printAllData();
     }
     
     @Test
@@ -139,25 +118,21 @@ class ArticleRepositoryTest {
         // given
         insertDummyData();
         
-        // when
         Set<Long> articleIds = Set.of(300L, 100L, 800L, 500L);
         
+        // when
         repository.deleteAllByIdInBatch(articleIds);
         
         // then
         articleIds.forEach(id ->
                 assertThat(repository.existsById(id)).isFalse());
-        
-        // log
-        printAllData();
     }
     
     private void insertDummyData() {
         List<Article> dummyInsert = new ArrayList<>();
         IntStream.rangeClosed(1, 10)
-                .forEach(idx -> dummyInsert.add(Article.builder()
-                        .title("title " + idx)
-                        .content("content " + idx).build()));
+                .forEach(idx -> dummyInsert.add(
+                        Article.of(null, "title " + idx, "content " + idx, null, null)));
         
         System.out.println("💁------- dummy data inserted ------------------------------------------------------------------------------------------------------┐");
         repository.saveAll(dummyInsert);
@@ -167,7 +142,8 @@ class ArticleRepositoryTest {
         printAllData();
     }
     
-    private void printAllData() {
+    @AfterEach
+    public void printAllData() {
         System.out.println("💁------- show all article data ------------------------------------------------------------------------------------------------------┐");
         repository.findAll()
                 .forEach(System.out::println);

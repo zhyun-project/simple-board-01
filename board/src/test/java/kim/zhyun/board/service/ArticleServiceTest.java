@@ -3,10 +3,11 @@ package kim.zhyun.board.service;
 import kim.zhyun.board.data.ArticleCreateRequest;
 import kim.zhyun.board.data.ArticleDto;
 import kim.zhyun.board.data.ArticleUpdateRequest;
+import kim.zhyun.board.data.type.ExceptionType;
 import kim.zhyun.board.domain.Article;
 import kim.zhyun.board.exception.ArticleNotFoundException;
 import kim.zhyun.board.repository.ArticleRepository;
-import kim.zhyun.board.data.type.ExceptionType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -178,7 +179,8 @@ class ArticleServiceTest {
         printAllData();
     }
     
-    private void printAllData() {
+    @AfterEach
+    public void printAllData() {
         System.out.println("💁------- show all article data ------------------------------------------------------------------------------------------------------┐");
         repository.findAll()
                 .forEach(System.out::println);
