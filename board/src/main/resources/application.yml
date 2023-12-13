@@ -1,8 +1,55 @@
 spring:
+  profiles:
+    active: play
+    include:
+      - common
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: common
+
   h2:
     console:
       path: /h2-console
       enabled: true
+
+
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        highlight_sql: true
+
+logging:
+  level:
+    org.hibernate.sql: debug
+    org.hibernate.type: trace
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: play
+
+  datasource:
+    url: jdbc:h2:./h2/board;mode=MYSQL;
+    username: sa
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: test
 
   datasource:
     url: jdbc:h2:mem:board;mode=MYSQL;
@@ -10,13 +57,5 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
-    properties:
-      show-sql: true
-      format_sql: true
-      highlight_sql: true
+      ddl-auto: create-drop
 
-logging:
-  level:
-    org.hibernate.sql: debug
-    org.hibernate.type: trace
