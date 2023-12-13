@@ -4,6 +4,7 @@ package kim.zhyun.board.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import kim.zhyun.board.data.ArticleCreateRequest;
 import kim.zhyun.board.data.ArticleDto;
 import kim.zhyun.board.exception.ArticleNotFoundException;
 import kim.zhyun.board.service.ArticleService;
@@ -23,13 +24,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static java.time.LocalDateTime.now;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.when;
+import static org.mockito.BDDMockito.*;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -109,6 +109,29 @@ class ArticleControllerTest {
                 .andExpect(jsonPath("status").value(false))
                 .andExpect(jsonPath("message").value(ExceptionType.ARTICLE_NOT_FOUND.getDescription()))
                 .andDo(print());
+    }
+    
+    @DisplayName("게시글 등록 - 성공")
+    @Test
+    void save() throws Exception {
+        // given
+        ArticleCreateRequest request = ArticleCreateRequest.of("제목 1", "졸리다 😳");
+        long saveId = 10L;
+        
+        // when
+        when(articleService.save(request)).thenReturn(saveId);
+        
+        // then
+        mvc.perform(post("/article")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.status").value(true))
+                .andExpect(jsonPath("$.message").value("등록되었습니다."))
+                .andExpect(redirectedUrl("http://localhost/articles/" + saveId))
+                .andDo(print());
+        
+        verify(articleService).save(request);
     }
     
     
