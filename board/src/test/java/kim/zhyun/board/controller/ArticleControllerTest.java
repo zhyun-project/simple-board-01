@@ -73,9 +73,11 @@ class ArticleControllerTest {
                     ArticleDto.of(2L, "title 2", "안뇽하십니꽈 2", now().plusHours(2), now().plusHours(2)),
                     ArticleDto.of(3L, "title 3", "안뇽하십니꽈 3", now().plusHours(3), now().plusHours(3))
             );
+            
+            // When
             when(articleService.findAll()).thenReturn(dtos);
             
-            // When & Then
+            // Then
             mvc.perform(get("/articles").contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value(true))
@@ -92,9 +94,11 @@ class ArticleControllerTest {
             // given
             long articleId = 1L;
             ArticleDto articleDto = ArticleDto.of(articleId, "title", "content", now(), now());
+            
+            // When
             when(articleService.findById(articleId)).thenReturn(articleDto);
             
-            // When & Then
+            // Then
             mvc.perform(get("/articles/{id}", articleId).contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value(true))
@@ -110,9 +114,11 @@ class ArticleControllerTest {
         void findById_non_existent() throws Exception {
             // given
             long articleId = 1L;
+            
+            // When
             given(articleService.findById(articleId)).willThrow(new ArticleNotFoundException(ARTICLE_NOT_FOUND));
             
-            // When & Then
+            // Then
             mvc.perform(get("/articles/{id}", articleId).contentType(MediaType.APPLICATION_JSON))
                     .andExpect((result) -> assertTrue("", result.getResolvedException() instanceof ArticleNotFoundException))
                     .andExpect(status().is4xxClientError())
@@ -166,7 +172,7 @@ class ArticleControllerTest {
                         ValidExceptionResponse.builder()
                                 .field("title")
                                 .message("제목을 입력해주세요").build());
-                
+                // run
                 run(request, exceptionResponse);
             }
             
@@ -182,6 +188,7 @@ class ArticleControllerTest {
                                 .field("content")
                                 .message("내용을 입력해주세요").build());
                 
+                // run
                 run(request, exceptionResponse);
             }
             
@@ -201,6 +208,7 @@ class ArticleControllerTest {
                                 .field("content")
                                 .message("내용을 입력해주세요").build());
                 
+                // run
                 run(request, exceptionResponse);
             }
             
