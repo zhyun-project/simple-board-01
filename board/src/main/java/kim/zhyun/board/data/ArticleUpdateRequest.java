@@ -1,7 +1,6 @@
 package kim.zhyun.board.data;
 
 import jakarta.validation.constraints.NotEmpty;
-import kim.zhyun.board.domain.Article;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,13 +21,7 @@ public class ArticleUpdateRequest {
     
     @NotEmpty(message = "내용을 입력해주세요")
     private String content;
-    
-    public static Article to(ArticleUpdateRequest request) {
-        return Article.builder()
-                .id(request.getId())
-                .title(request.getTitle())
-                .content(request.getContent()).build();
-    }
+
     
     @Override
     public boolean equals(Object obj) {

@@ -22,9 +22,7 @@ public class ArticleCreateRequest {
     private String content;
     
     public static Article to(ArticleCreateRequest request) {
-        return Article.builder()
-                .title(request.getTitle())
-                .content(request.getContent()).build();
+        return Article.of(null, request.getTitle(), request.getContent(), null, null);
     }
     
     @Override

@@ -112,6 +112,7 @@ class ArticleServiceTest {
         
         // when
         service.update(request);
+        repository.flush();
         
         // then
         ArticleDto updatedArticle = service.findById(id);
@@ -121,6 +122,8 @@ class ArticleServiceTest {
 
         assertThat(updatedArticle).usingRecursiveComparison().isNotEqualTo(beforeArticle);
         assertThat(actual).usingRecursiveComparison().isEqualTo(updatedArticle);
+        assertThat(updatedArticle.getCreatedAt()).isEqualTo(beforeArticle.getCreatedAt());
+        assertThat(updatedArticle.getModifiedAt()).isNotEqualTo(beforeArticle.getModifiedAt());
     }
     
     @DisplayName("게시글 삭제 - 게시글 1개 삭제")
@@ -166,9 +169,8 @@ class ArticleServiceTest {
     public void insertDummyData() {
         List<Article> dummyInsert = new ArrayList<>();
         IntStream.rangeClosed(1, 10)
-                .forEach(idx -> dummyInsert.add(Article.builder()
-                        .title("title " + idx)
-                        .content("content " + idx).build()));
+                .forEach(idx -> dummyInsert.add(
+                        Article.of(null, "title " + idx, "content " + idx, null, null)));
         
         System.out.println("💁------- dummy data inserted ------------------------------------------------------------------------------------------------------┐");
         repository.saveAll(dummyInsert);
