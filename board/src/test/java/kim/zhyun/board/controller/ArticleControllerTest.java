@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import kim.zhyun.board.data.ArticleCreateRequest;
 import kim.zhyun.board.data.ArticleDto;
+import kim.zhyun.board.data.ArticleUpdateRequest;
 import kim.zhyun.board.data.ValidExceptionResponse;
 import kim.zhyun.board.exception.ArticleNotFoundException;
 import kim.zhyun.board.service.ArticleService;
@@ -29,8 +30,7 @@ import static java.time.LocalDateTime.now;
 import static kim.zhyun.board.type.ExceptionType.ARTICLE_NOT_FOUND;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -231,6 +231,113 @@ class ArticleControllerTest {
         }
     }
     
+    
+    @DisplayName("게시글 수정 Case 모음")
+    @Nested
+    class UpdateArticle {
+        
+        @DisplayName("수정 - 성공")
+        @Test
+        void update() throws Exception {
+            // given
+            long updateId = 10L;
+            ArticleUpdateRequest request = ArticleUpdateRequest.of(updateId, "제목 1 수정", "우리 집에 홍주가 업데이트 되었다 😋");
+            
+            // when
+            willDoNothing().given(articleService).update(request);
+            
+            // then
+            mvc.perform(put("/articles/{id}", updateId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(mapper.writeValueAsString(request)))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.status").value(true))
+                    .andExpect(jsonPath("$.message").value("수정되었습니다."))
+                    .andExpect(redirectedUrl("http://localhost/articles/" + updateId))
+                    .andDo(print());
+            
+            verify(articleService).update(request);
+        }
+        
+        @DisplayName("수정 실패 Case 모음")
+        @Nested
+        class UpdateFailTest {
+            
+            @DisplayName("사유 : 제목 없음")
+            @Test
+            void update_failed_because_title_is_empty() throws Exception {
+                // given
+                long updateId = 10L;
+                ArticleUpdateRequest request = ArticleUpdateRequest.of(updateId, "", "우리 집에 홍주가 업데이트 되었다 😋");
+                
+                // when
+                willDoNothing().given(articleService).update(request);
+                
+                List<ValidExceptionResponse> exceptionResponse = List.of(
+                        ValidExceptionResponse.builder()
+                                .field("title")
+                                .message("제목을 입력해주세요").build());
+                // run
+                run(updateId, request, exceptionResponse);
+            }
+            
+            @DisplayName("사유 : 내용 없음")
+            @Test
+            void update_failed_because_content_is_empty() throws Exception {
+                // given
+                long updateId = 10L;
+                ArticleUpdateRequest request = ArticleUpdateRequest.of(updateId, "제목 1 수정", "");
+                
+                // when
+                willDoNothing().given(articleService).update(request);
+                
+                List<ValidExceptionResponse> exceptionResponse = List.of(
+                        ValidExceptionResponse.builder()
+                                .field("content")
+                                .message("내용을 입력해주세요").build());
+                
+                // run
+                run(updateId, request, exceptionResponse);
+            }
+            
+            @Disabled("reponse body의 result 리스트에서 객체 출력 순서가 랜덤하기 때문에, 테스트 실행시 response body 값 확인 필요")
+            @DisplayName("사유 : 제목, 내용 없음")
+            @Test
+            void update_failed_because_all_field_is_empty() throws Exception {
+                // given
+                long updateId = 10L;
+                ArticleUpdateRequest request = ArticleUpdateRequest.of(updateId, "", "");
+                
+                List<ValidExceptionResponse> exceptionResponse = List.of(
+                        ValidExceptionResponse.builder()
+                                .field("title")
+                                .message("제목을 입력해주세요").build(),
+                        ValidExceptionResponse.builder()
+                                .field("content")
+                                .message("내용을 입력해주세요").build());
+                
+                // run
+                run(updateId, request, exceptionResponse);
+            }
+            
+            public void run(long id, ArticleUpdateRequest request, List<ValidExceptionResponse> exceptionResponse) throws Exception {
+                // when
+                willThrow(new ArticleNotFoundException(ARTICLE_NOT_FOUND)).given(articleService).update(request);
+                
+                // then
+                mvc.perform(put("/articles/{id}", id)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(mapper.writeValueAsString(request)))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.status").value(false))
+                        .andExpect(jsonPath("$.message").value("valid error"))
+                        .andExpect(jsonPath("$.result").value(getJsonArrayValidException(exceptionResponse)))
+                        .andDo(print());
+                
+                verify(articleService, times(0)).update(request);
+            }
+        }
+    }
     
     
     
