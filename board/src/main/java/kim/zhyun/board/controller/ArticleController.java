@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import kim.zhyun.board.data.ApiResponse;
 import kim.zhyun.board.data.ArticleCreateRequest;
 import kim.zhyun.board.data.ArticleDto;
+import kim.zhyun.board.data.ArticleUpdateRequest;
 import kim.zhyun.board.service.ArticleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -54,5 +55,24 @@ public class ArticleController {
                 .body(ApiResponse.<Void>builder()
                         .status(true)
                         .message("등록되었습니다.").build());
+    }
+    
+    
+    /**
+     * 게시글 수정
+     */
+    @PutMapping("/articles/{id}")
+    public ResponseEntity<Object> update(@PathVariable long id,
+                                         @Valid @RequestBody ArticleUpdateRequest request) {
+        service.update(request);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequestUri()
+                .build().toUri();
+        
+        return ResponseEntity
+                .created(location)
+                .body(ApiResponse.<Void>builder()
+                        .status(true)
+                        .message("수정되었습니다.").build());
     }
 }
