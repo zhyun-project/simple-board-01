@@ -51,168 +51,189 @@ class ArticleControllerTest {
         this.parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
     }
     
-    @DisplayName("전체 게시글 조회 - 게시글 없음")
-    @Test
-    void findAll_size_zero() throws Exception {
-        // When & Then
-        mvc.perform(get("/articles").contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("status").value(true))
-                .andExpect(jsonPath("message").value("article 전체 조회"))
-                .andDo(print());
-    }
-    
-    @DisplayName("전체 게시글 조회 - 게시글 있음")
-    @Test
-    void findAll() throws Exception {
-        List<ArticleDto> dtos = List.of(
-                ArticleDto.of(1L, "title 1", "안뇽하십니꽈 1", now().plusHours(1), now().plusHours(1)),
-                ArticleDto.of(2L, "title 2", "안뇽하십니꽈 2", now().plusHours(2), now().plusHours(2)),
-                ArticleDto.of(3L, "title 3", "안뇽하십니꽈 3", now().plusHours(3), now().plusHours(3))
-        );
-        when(articleService.findAll()).thenReturn(dtos);
-        
-        // When & Then
-        mvc.perform(get("/articles").contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(true))
-                .andExpect(jsonPath("$.message").value("article 전체 조회"))
-                .andExpect(jsonPath("$.result").value(getJsonArrayDto(dtos)))
-                .andDo(print());
-        
-        verify(articleService).findAll();
-    }
-    
-    @DisplayName("게시글 1개 조회")
-    @Test
-    void findById() throws Exception {
-        // given
-        long articleId = 1L;
-        ArticleDto articleDto = ArticleDto.of(articleId, "title", "content", now(), now());
-        when(articleService.findById(articleId)).thenReturn(articleDto);
-        
-        // When & Then
-        mvc.perform(get("/articles/{id}", articleId).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(true))
-                .andExpect(jsonPath("$.message").value("article " + articleId + " 조회"))
-                .andExpect(jsonPath("$.result").value(getJsonObject(articleDto)))
-                .andDo(print());
-        
-        verify(articleService).findById(articleId);
-    }
-    
-    @DisplayName("게시글 1개 조회 - 없는 게시글 조회")
-    @Test
-    void findById_non_existent() throws Exception {
-        // given
-        long articleId = 1L;
-        given(articleService.findById(articleId)).willThrow(new ArticleNotFoundException(ARTICLE_NOT_FOUND));
-        
-        // When & Then
-        mvc.perform(get("/articles/{id}", articleId).contentType(MediaType.APPLICATION_JSON))
-                .andExpect((result) -> assertTrue("", result.getResolvedException() instanceof ArticleNotFoundException))
-                .andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("status").value(false))
-                .andExpect(jsonPath("message").value(ARTICLE_NOT_FOUND.getDescription()))
-                .andDo(print());
-        
-        verify(articleService).findById(articleId);
-    }
-    
-    @DisplayName("게시글 등록 - 성공")
-    @Test
-    void save() throws Exception {
-        // given
-        ArticleCreateRequest request = ArticleCreateRequest.of("제목 1", "졸리다 😳");
-        long saveId = 10L;
-        
-        // when
-        when(articleService.save(request)).thenReturn(saveId);
-        
-        // then
-        mvc.perform(post("/article")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.status").value(true))
-                .andExpect(jsonPath("$.message").value("등록되었습니다."))
-                .andExpect(redirectedUrl("http://localhost/articles/" + saveId))
-                .andDo(print());
-        
-        verify(articleService).save(request);
-    }
-    
-    @DisplayName("게시글 등록 실패 모음")
+    @DisplayName("게시글 조회 Case 모음")
     @Nested
-    public class SaveFailTest {
-        
-        @DisplayName("사유 : 제목 없음")
+    class SelectArticles {
+        @DisplayName("전체 조회 - 게시글 없음")
         @Test
-        void save_failed_because_title_is_empty() throws Exception {
-            // given
-            ArticleCreateRequest request = ArticleCreateRequest.of("", "졸리다 😳");
-            long saveId = 10L;
-            
-            List<ValidExceptionResponse> exceptionResponse = List.of(
-                    ValidExceptionResponse.builder()
-                            .field("title")
-                            .message("제목을 입력해주세요").build());
-            
-            run(request, exceptionResponse);
+        void findAll_size_zero() throws Exception {
+            // When & Then
+            mvc.perform(get("/articles").contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("status").value(true))
+                    .andExpect(jsonPath("message").value("article 전체 조회"))
+                    .andDo(print());
         }
         
-        @DisplayName("사유 : 내용 없음")
+        @DisplayName("전체 조회")
         @Test
-        void save_failed_because_content_is_empty() throws Exception {
-            // given
-            ArticleCreateRequest request = ArticleCreateRequest.of("타이틀", "");
-            long saveId = 10L;
+        void findAll() throws Exception {
+            List<ArticleDto> dtos = List.of(
+                    ArticleDto.of(1L, "title 1", "안뇽하십니꽈 1", now().plusHours(1), now().plusHours(1)),
+                    ArticleDto.of(2L, "title 2", "안뇽하십니꽈 2", now().plusHours(2), now().plusHours(2)),
+                    ArticleDto.of(3L, "title 3", "안뇽하십니꽈 3", now().plusHours(3), now().plusHours(3))
+            );
             
-            List<ValidExceptionResponse> exceptionResponse = List.of(
-                    ValidExceptionResponse.builder()
-                            .field("content")
-                            .message("내용을 입력해주세요").build());
+            // When
+            when(articleService.findAll()).thenReturn(dtos);
             
-            run(request, exceptionResponse);
+            // Then
+            mvc.perform(get("/articles").contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value(true))
+                    .andExpect(jsonPath("$.message").value("article 전체 조회"))
+                    .andExpect(jsonPath("$.result").value(getJsonArrayDto(dtos)))
+                    .andDo(print());
+            
+            verify(articleService).findAll();
         }
         
-        @Disabled("reponse body의 result 리스트에서 객체 출력 순서가 랜덤하기 때문에, 테스트 실행시 response body 값 확인 필요")
-        @DisplayName("사유 : 제목, 내용 없음")
+        @DisplayName("1건 조회")
         @Test
-        void save_failed_because_all_field_is_empty() throws Exception {
+        void findById() throws Exception {
             // given
-            ArticleCreateRequest request = ArticleCreateRequest.of("", "");
-            long saveId = 10L;
+            long articleId = 1L;
+            ArticleDto articleDto = ArticleDto.of(articleId, "title", "content", now(), now());
             
-            List<ValidExceptionResponse> exceptionResponse = List.of(
-                    ValidExceptionResponse.builder()
-                            .field("title")
-                            .message("제목을 입력해주세요").build(),
-                    ValidExceptionResponse.builder()
-                            .field("content")
-                            .message("내용을 입력해주세요").build());
+            // When
+            when(articleService.findById(articleId)).thenReturn(articleDto);
             
-            run(request, exceptionResponse);
+            // Then
+            mvc.perform(get("/articles/{id}", articleId).contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value(true))
+                    .andExpect(jsonPath("$.message").value("article " + articleId + " 조회"))
+                    .andExpect(jsonPath("$.result").value(getJsonObject(articleDto)))
+                    .andDo(print());
+            
+            verify(articleService).findById(articleId);
         }
         
-        public void run(ArticleCreateRequest request, List<ValidExceptionResponse> exceptionResponse) throws Exception {
+        @DisplayName("1건 조회 - 없는 게시글 조회")
+        @Test
+        void findById_non_existent() throws Exception {
+            // given
+            long articleId = 1L;
+            
+            // When
+            given(articleService.findById(articleId)).willThrow(new ArticleNotFoundException(ARTICLE_NOT_FOUND));
+            
+            // Then
+            mvc.perform(get("/articles/{id}", articleId).contentType(MediaType.APPLICATION_JSON))
+                    .andExpect((result) -> assertTrue("", result.getResolvedException() instanceof ArticleNotFoundException))
+                    .andExpect(status().is4xxClientError())
+                    .andExpect(jsonPath("status").value(false))
+                    .andExpect(jsonPath("message").value(ARTICLE_NOT_FOUND.getDescription()))
+                    .andDo(print());
+            
+            verify(articleService).findById(articleId);
+        }
+    }
+    
+    @DisplayName("게시글 등록 Case 모음")
+    @Nested
+    class SaveArticle {
+        
+        @DisplayName("등록 - 성공")
+        @Test
+        void save() throws Exception {
+            // given
+            ArticleCreateRequest request = ArticleCreateRequest.of("제목 1", "졸리다 😳");
+            long saveId = 10L;
+            
             // when
-            when(articleService.save(request)).thenThrow(new ArticleNotFoundException(ARTICLE_NOT_FOUND));
+            when(articleService.save(request)).thenReturn(saveId);
             
             // then
             mvc.perform(post("/article")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(mapper.writeValueAsString(request)))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.status").value(false))
-                    .andExpect(jsonPath("$.message").value("valid error"))
-                    .andExpect(jsonPath("$.result").value(getJsonArrayValidException(exceptionResponse)))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.status").value(true))
+                    .andExpect(jsonPath("$.message").value("등록되었습니다."))
+                    .andExpect(redirectedUrl("http://localhost/articles/" + saveId))
                     .andDo(print());
             
-            verify(articleService, times(0)).save(request);
+            verify(articleService).save(request);
+        }
+        
+        @DisplayName("등록 실패 Case 모음")
+        @Nested
+        class SaveFailTest {
+            
+            @DisplayName("사유 : 제목 없음")
+            @Test
+            void save_failed_because_title_is_empty() throws Exception {
+                // given
+                ArticleCreateRequest request = ArticleCreateRequest.of("", "졸리다 😳");
+                long saveId = 10L;
+                
+                List<ValidExceptionResponse> exceptionResponse = List.of(
+                        ValidExceptionResponse.builder()
+                                .field("title")
+                                .message("제목을 입력해주세요").build());
+                // run
+                run(request, exceptionResponse);
+            }
+            
+            @DisplayName("사유 : 내용 없음")
+            @Test
+            void save_failed_because_content_is_empty() throws Exception {
+                // given
+                ArticleCreateRequest request = ArticleCreateRequest.of("타이틀", "");
+                long saveId = 10L;
+                
+                List<ValidExceptionResponse> exceptionResponse = List.of(
+                        ValidExceptionResponse.builder()
+                                .field("content")
+                                .message("내용을 입력해주세요").build());
+                
+                // run
+                run(request, exceptionResponse);
+            }
+            
+            @Disabled("reponse body의 result 리스트에서 객체 출력 순서가 랜덤하기 때문에, 테스트 실행시 response body 값 확인 필요")
+            @DisplayName("사유 : 제목, 내용 없음")
+            @Test
+            void save_failed_because_all_field_is_empty() throws Exception {
+                // given
+                ArticleCreateRequest request = ArticleCreateRequest.of("", "");
+                long saveId = 10L;
+                
+                List<ValidExceptionResponse> exceptionResponse = List.of(
+                        ValidExceptionResponse.builder()
+                                .field("title")
+                                .message("제목을 입력해주세요").build(),
+                        ValidExceptionResponse.builder()
+                                .field("content")
+                                .message("내용을 입력해주세요").build());
+                
+                // run
+                run(request, exceptionResponse);
+            }
+            
+            public void run(ArticleCreateRequest request, List<ValidExceptionResponse> exceptionResponse) throws Exception {
+                // when
+                when(articleService.save(request)).thenThrow(new ArticleNotFoundException(ARTICLE_NOT_FOUND));
+                
+                // then
+                mvc.perform(post("/article")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(mapper.writeValueAsString(request)))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.status").value(false))
+                        .andExpect(jsonPath("$.message").value("valid error"))
+                        .andExpect(jsonPath("$.result").value(getJsonArrayValidException(exceptionResponse)))
+                        .andDo(print());
+                
+                verify(articleService, times(0)).save(request);
+            }
         }
     }
+    
+    
+    
+    
     
     
     private Object getJsonObject(ArticleDto articleDto) throws ParseException, JsonProcessingException {
