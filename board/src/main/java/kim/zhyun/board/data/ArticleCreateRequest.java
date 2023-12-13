@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.Objects;
+
 @ToString
 @AllArgsConstructor(staticName = "of")
 @NoArgsConstructor
@@ -23,6 +25,17 @@ public class ArticleCreateRequest {
         return Article.builder()
                 .title(request.getTitle())
                 .content(request.getContent()).build();
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        
+        ArticleCreateRequest that = (ArticleCreateRequest) obj;
+        
+        if (!Objects.equals(title, that.title)) return false;
+        return Objects.equals(content, that.content);
     }
     
 }
