@@ -6,13 +6,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import kim.zhyun.board.data.ArticleCreateRequest;
 import kim.zhyun.board.data.ArticleDto;
+import kim.zhyun.board.data.ValidExceptionResponse;
 import kim.zhyun.board.exception.ArticleNotFoundException;
 import kim.zhyun.board.service.ArticleService;
-import kim.zhyun.board.type.ExceptionType;
 import net.minidev.json.JSONArray;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -141,6 +143,77 @@ class ArticleControllerTest {
         verify(articleService).save(request);
     }
     
+    @DisplayName("게시글 등록 실패 모음")
+    @Nested
+    public class SaveFailTest {
+        
+        @DisplayName("사유 : 제목 없음")
+        @Test
+        void save_failed_because_title_is_empty() throws Exception {
+            // given
+            ArticleCreateRequest request = ArticleCreateRequest.of("", "졸리다 😳");
+            long saveId = 10L;
+            
+            List<ValidExceptionResponse> exceptionResponse = List.of(
+                    ValidExceptionResponse.builder()
+                            .field("title")
+                            .message("제목을 입력해주세요").build());
+            
+            run(request, exceptionResponse);
+        }
+        
+        @DisplayName("사유 : 내용 없음")
+        @Test
+        void save_failed_because_content_is_empty() throws Exception {
+            // given
+            ArticleCreateRequest request = ArticleCreateRequest.of("타이틀", "");
+            long saveId = 10L;
+            
+            List<ValidExceptionResponse> exceptionResponse = List.of(
+                    ValidExceptionResponse.builder()
+                            .field("content")
+                            .message("내용을 입력해주세요").build());
+            
+            run(request, exceptionResponse);
+        }
+        
+        @Disabled("reponse body의 result 리스트에서 객체 출력 순서가 랜덤하기 때문에, 테스트 실행시 response body 값 확인 필요")
+        @DisplayName("사유 : 제목, 내용 없음")
+        @Test
+        void save_failed_because_all_field_is_empty() throws Exception {
+            // given
+            ArticleCreateRequest request = ArticleCreateRequest.of("", "");
+            long saveId = 10L;
+            
+            List<ValidExceptionResponse> exceptionResponse = List.of(
+                    ValidExceptionResponse.builder()
+                            .field("title")
+                            .message("제목을 입력해주세요").build(),
+                    ValidExceptionResponse.builder()
+                            .field("content")
+                            .message("내용을 입력해주세요").build());
+            
+            run(request, exceptionResponse);
+        }
+        
+        public void run(ArticleCreateRequest request, List<ValidExceptionResponse> exceptionResponse) throws Exception {
+            // when
+            when(articleService.save(request)).thenThrow(new ArticleNotFoundException(ARTICLE_NOT_FOUND));
+            
+            // then
+            mvc.perform(post("/article")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(mapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.status").value(false))
+                    .andExpect(jsonPath("$.message").value("valid error"))
+                    .andExpect(jsonPath("$.result").value(getJsonArrayValidException(exceptionResponse)))
+                    .andDo(print());
+            
+            verify(articleService, times(0)).save(request);
+        }
+    }
+    
     
     private Object getJsonObject(ArticleDto articleDto) throws ParseException, JsonProcessingException {
         return parser.parse(mapper.writeValueAsString(articleDto));
@@ -151,6 +224,18 @@ class ArticleControllerTest {
         dtos.forEach(dto -> {
             try {
                 array.add(parser.parse(mapper.writeValueAsString(dto)));
+            } catch (ParseException | JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        });
+        return array;
+    }
+    
+    private Object getJsonArrayValidException(List<ValidExceptionResponse> objs) {
+        JSONArray array = new JSONArray();
+        objs.forEach(obj -> {
+            try {
+                array.add(parser.parse(mapper.writeValueAsString(obj)));
             } catch (ParseException | JsonProcessingException e) {
                 e.printStackTrace();
             }

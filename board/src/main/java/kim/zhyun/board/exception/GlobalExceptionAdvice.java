@@ -47,7 +47,7 @@ public class GlobalExceptionAdvice extends ResponseEntityExceptionHandler {
         return ResponseEntity
                 .badRequest().body(ApiResponse.<List<ValidExceptionResponse>>builder()
                         .status(false)
-                        .message(ex.getMessage())
+                        .message("valid error")
                         .result(list).build());
     }
     
