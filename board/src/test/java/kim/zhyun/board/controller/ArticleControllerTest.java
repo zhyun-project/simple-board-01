@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static java.time.LocalDateTime.now;
+import static kim.zhyun.board.type.ExceptionType.ARTICLE_NOT_FOUND;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -74,8 +75,10 @@ class ArticleControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(true))
                 .andExpect(jsonPath("$.message").value("article 전체 조회"))
-                .andExpect(jsonPath("$.result").value(getJsonArray(dtos)))
+                .andExpect(jsonPath("$.result").value(getJsonArrayDto(dtos)))
                 .andDo(print());
+        
+        verify(articleService).findAll();
     }
     
     @DisplayName("게시글 1개 조회")
@@ -93,6 +96,8 @@ class ArticleControllerTest {
                 .andExpect(jsonPath("$.message").value("article " + articleId + " 조회"))
                 .andExpect(jsonPath("$.result").value(getJsonObject(articleDto)))
                 .andDo(print());
+        
+        verify(articleService).findById(articleId);
     }
     
     @DisplayName("게시글 1개 조회 - 없는 게시글 조회")
@@ -100,15 +105,17 @@ class ArticleControllerTest {
     void findById_non_existent() throws Exception {
         // given
         long articleId = 1L;
-        given(articleService.findById(articleId)).willThrow(new ArticleNotFoundException(ExceptionType.ARTICLE_NOT_FOUND));
+        given(articleService.findById(articleId)).willThrow(new ArticleNotFoundException(ARTICLE_NOT_FOUND));
         
         // When & Then
         mvc.perform(get("/articles/{id}", articleId).contentType(MediaType.APPLICATION_JSON))
                 .andExpect((result) -> assertTrue("", result.getResolvedException() instanceof ArticleNotFoundException))
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("status").value(false))
-                .andExpect(jsonPath("message").value(ExceptionType.ARTICLE_NOT_FOUND.getDescription()))
+                .andExpect(jsonPath("message").value(ARTICLE_NOT_FOUND.getDescription()))
                 .andDo(print());
+        
+        verify(articleService).findById(articleId);
     }
     
     @DisplayName("게시글 등록 - 성공")
@@ -139,15 +146,15 @@ class ArticleControllerTest {
         return parser.parse(mapper.writeValueAsString(articleDto));
     }
     
-    private Object getJsonArray(List<ArticleDto> dtos) {
+    private Object getJsonArrayDto(List<ArticleDto> dtos) {
         JSONArray array = new JSONArray();
         dtos.forEach(dto -> {
-                try {
-                    array.add(parser.parse(mapper.writeValueAsString(dto)));
-                } catch (ParseException | JsonProcessingException e) {
-                    e.printStackTrace();
-                }
-            });
+            try {
+                array.add(parser.parse(mapper.writeValueAsString(dto)));
+            } catch (ParseException | JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        });
         return array;
     }
     
