@@ -6,8 +6,8 @@ POST http://localhost:8080/article
 Content-Type: application/json
 
 {
-  "title": "title 2",
-  "content": "content 2"
+  "title": "title 1",
+  "content": "content 1"
 }
 
 ### 게시글 단건 조회 - 성공 <-- 게시글 저장 구현 후 사용
@@ -17,4 +17,12 @@ GET http://localhost:8080/articles/1
 GET http://localhost:8080/articles/1000
 
 
+### 게시글 수정
+PUT http://localhost:8080/articles/1
+Content-Type: application/json
 
+{
+  "id": 1,
+  "title": "title 11",
+  "content": "content 11"
+}
