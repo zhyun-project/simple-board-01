@@ -14,7 +14,8 @@ import net.minidev.json.parser.ParseException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -23,14 +24,15 @@ import java.util.List;
 
 import static java.time.LocalDateTime.now;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
+import static org.mockito.BDDMockito.when;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(ArticleController.class)
+@AutoConfigureMockMvc
+@SpringBootTest
 class ArticleControllerTest {
     
     @MockBean
@@ -85,7 +87,7 @@ class ArticleControllerTest {
         when(articleService.findById(articleId)).thenReturn(articleDto);
         
         // When & Then
-        mvc.perform(get("/articles/" + articleId).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(get("/articles/{id}", articleId).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(true))
                 .andExpect(jsonPath("$.message").value("article " + articleId + " 조회"))
@@ -101,15 +103,13 @@ class ArticleControllerTest {
         given(articleService.findById(articleId)).willThrow(new ArticleNotFoundException(ExceptionType.ARTICLE_NOT_FOUND));
         
         // When & Then
-        mvc.perform(get("/articles/" + articleId).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(get("/articles/{id}", articleId).contentType(MediaType.APPLICATION_JSON))
                 .andExpect((result) -> assertTrue("", result.getResolvedException() instanceof ArticleNotFoundException))
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("status").value(false))
                 .andExpect(jsonPath("message").value(ExceptionType.ARTICLE_NOT_FOUND.getDescription()))
                 .andDo(print());
     }
-    
-    
     
     
     private Object getJsonObject(ArticleDto articleDto) throws ParseException, JsonProcessingException {
