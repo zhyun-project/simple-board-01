@@ -60,6 +60,7 @@ curl -X GET 'http://localhost/articles/{id}'
     "status": true,
     "message": "article 1 조회",
     "result": {
+        "id": 1,
         "title": "게시글 1번입니다.",
         "content": "안녕하세요 게시글 1번 본문입니다.",
 	"modified_at": "2023-12-10T21:54:32.321",
@@ -115,23 +116,27 @@ curl -X GET 'http://localhost/articles'
     "message": "article 전체 조회",
     "result": [
         {
+            "id": 1,
             "title": "게시글 1번입니다.",
             "content": "안녕하세요 게시글 1번 본문입니다.",
             "modified_at": "2023-12-10T21:54:32.321",
             "created_at": "2023-12-10T21:54:32.321"
       },
       {
+            "id": 2,
             "title": "2번입니다.",
             "content": "안녕하세요 게시글 2번 본문입니다.",
             "modified_at": "2023-12-10T21:54:32.321",
             "created_at": "2023-12-10T21:54:32.321"
       },
       {
+            "id": 3,
             "title": "게시글 3번.",
             "content": "안녕하세요 게시글 3번 본문입니다.",
             "modified_at": "2023-12-10T21:54:32.321",
             "created_at": "2023-12-10T21:54:32.321"
       }
+    ]
 }
 ```
 
@@ -196,7 +201,7 @@ Location: http://localhost:8080/articles/{id}
 ```java
 {
     "status": true,
-    "message": "등록 되었습니다."
+    "message": "등록되었습니다."
 }
 ```
 
@@ -276,7 +281,7 @@ Location: http://localhost:8080/articles/{id}
 ```java
 {
     "status": true,
-    "message": "수정 되었습니다."
+    "message": "수정되었습니다."
 }
 ```
 
@@ -296,7 +301,7 @@ Location: http://localhost:8080/articles/{id}
 ```java
 {
     "status": false,
-    "message": "잘못된 요청입니다."
+    "message": "잘못된 게시글 번호입니다."
 }
 ```
 
@@ -363,14 +368,12 @@ curl -X DELETE 'http://localhost/articles'
 #### Request Body
 
 ```bash
-{
-  "id": [1,2,3]
-}
+[1,2,3]
 ```
 
 | 파라미터 | 타입  | 필수 여부 | 설명  |
 | --- | --- | --- | --- |
-| id  | List<Long> | `필수` | 삭제할 article id 번호 리스트 |
+| 정수형 배열  | JsonArray | `필수` | 삭제할 article id 번호 리스트 |
 
 <br>
 
