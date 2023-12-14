@@ -13,7 +13,6 @@ import kim.zhyun.board.service.ArticleService;
 import net.minidev.json.JSONArray;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -23,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -194,7 +194,6 @@ class ArticleControllerTest {
                 run(request, exceptionResponse);
             }
             
-            @Disabled("reponse body의 result 리스트에서 객체 출력 순서가 랜덤하기 때문에, 테스트 실행시 response body 값 확인 필요")
             @DisplayName("사유 : 제목, 내용 없음")
             @Test
             void save_failed_because_all_field_is_empty() throws Exception {
@@ -203,13 +202,15 @@ class ArticleControllerTest {
                 long saveId = 10L;
                 
                 // run
-                List<ValidExceptionResponse> exceptionResponse = List.of(
+                List<ValidExceptionResponse> exceptionResponse = new ArrayList<>(List.of(
                         ValidExceptionResponse.builder()
                                 .field("title")
                                 .message("제목을 입력해주세요").build(),
                         ValidExceptionResponse.builder()
                                 .field("content")
-                                .message("내용을 입력해주세요").build());
+                                .message("내용을 입력해주세요").build()));
+                
+                exceptionResponse.sort((o1, o2) -> String.CASE_INSENSITIVE_ORDER.compare(o1.getField(), o2.getField()));
                 
                 run(request, exceptionResponse);
             }
@@ -297,7 +298,6 @@ class ArticleControllerTest {
                 run(updateId, request, exceptionResponse);
             }
             
-            @Disabled("reponse body의 result 리스트에서 객체 출력 순서가 랜덤하기 때문에, 테스트 실행시 response body 값 확인 필요")
             @DisplayName("사유 : 제목, 내용 없음")
             @Test
             void update_failed_because_all_field_is_empty() throws Exception {
@@ -306,13 +306,15 @@ class ArticleControllerTest {
                 ArticleUpdateRequest request = ArticleUpdateRequest.of(updateId, "", "");
                 
                 // run
-                List<ValidExceptionResponse> exceptionResponse = List.of(
+                List<ValidExceptionResponse> exceptionResponse = new ArrayList<>(List.of(
                         ValidExceptionResponse.builder()
                                 .field("title")
                                 .message("제목을 입력해주세요").build(),
                         ValidExceptionResponse.builder()
                                 .field("content")
-                                .message("내용을 입력해주세요").build());
+                                .message("내용을 입력해주세요").build()));
+                
+                exceptionResponse.sort((o1, o2) -> String.CASE_INSENSITIVE_ORDER.compare(o1.getField(), o2.getField()));
                 
                 run(updateId, request, exceptionResponse);
             }

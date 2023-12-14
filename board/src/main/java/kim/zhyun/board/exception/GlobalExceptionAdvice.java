@@ -44,6 +44,8 @@ public class GlobalExceptionAdvice extends ResponseEntityExceptionHandler {
                             .message(message).build());
                 });
         
+        list.sort((o1, o2) -> String.CASE_INSENSITIVE_ORDER.compare(o1.getField(), o2.getField()));
+        
         return ResponseEntity
                 .badRequest().body(ApiResponse.<List<ValidExceptionResponse>>builder()
                         .status(false)
