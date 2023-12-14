@@ -13,6 +13,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @RestControllerAdvice
@@ -43,6 +44,8 @@ public class GlobalExceptionAdvice extends ResponseEntityExceptionHandler {
                             .field(field.getField())
                             .message(message).build());
                 });
+        
+        Collections.sort(list);
         
         return ResponseEntity
                 .badRequest().body(ApiResponse.<List<ValidExceptionResponse>>builder()
